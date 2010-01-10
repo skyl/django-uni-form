@@ -1,28 +1,10 @@
-=====================================
-django-uni-form (Django Uni-Form)
-=====================================
-
-Django_ forms are easily rendered as tables,
-paragraphs, and unordered lists. However, elegantly rendered div based forms
-is something you have to do by hand. The purpose of this application is to
-provide a simple tag and/or filter that lets you quickly render forms in a div
-format.
-
-`Uni-form`_ has been selected as the base model for the design of the forms.
-
-Installing django-uni-form
-============================
-1. Install as uni_form in your Django apps directory.
-2. Copy the site_media files in uni_form to your project site_media directory.
-    uni-form-generic.css
-    uni-form.css
-    uni-form.jquery.js
-3. Add 'uni_form' to INSTALLED_APPS in settings.py.
-
+===========================
+Ways to use Django-uni-form
+===========================
 
 Using the django-uni-form filter (Easy and fun!)
 =================================================
-1. Add ``{% load uni_form %}`` to the template that calls your form.
+1. Add ``{% load uni_form_tags %}`` to the template that calls your form.
 2. Append your form call with the as_uni_form filter::
 
     {{ my_form|as_uni_form }}
@@ -67,7 +49,7 @@ Using the django-uni-form templatetag in your view (Intermediate)
         
 2. In your template do the following::
 
-    {% load uni_form %}
+    {% load uni_form_tags %}
     
     {% uni_form form helper %}
 
@@ -97,10 +79,38 @@ Using the django-uni-form templatetag in your form class (Intermediate)
         
 2. In your template do the following::
 
-    {% load uni_form %}
+    {% load uni_form_tags %}
     {% with form.helper as helper %}
         {% uni_form form helper %}
     {% endwith %}
+    
+Using the django-uni-form templatetag to change action/method (Intermediate)
+============================================================================
+1. In your form class add the following after field definitions::
+
+    from uni_form.helpers import FormHelper, Submit
+
+    class MyForm(forms.Form):
+        title = forms.CharField(label=_("Title"), max_length=30, widget=forms.TextInput())
+
+        # Attach a formHelper to your forms class.
+        helper = FormHelper()
+        
+        # Change the form and method
+        helper.form_action = 'my-url-name-defined-in-url-conf'
+        helper.form_method = 'GET' # Only GET and POST are legal
+        
+        # add in a submit and reset button
+        submit = Submit('search','search this site')
+        helper.add_input(submit)
+        
+2. In your template do the following::
+
+    {% load uni_form_tags %}
+    {% with form.helper as helper %}
+        {% uni_form form helper %}
+    {% endwith %}
+
 
 
 Adding a layout to your form class (Intermediate)
@@ -157,14 +167,10 @@ Uniform helpers can use layout objects. A layout can consist of fieldsets, rows,
         
 Then, just like in the previous example, add the following to your template::
 
-    {% load uni_form %}
+    {% load uni_form_tags %}
     {% with form.helper as helper %}
         {% uni_form form helper %}
     {% endwith %}
            
 
 This allows you to group fields in fieldsets, or rows or columns or add HTML between fields etc.
-
-
-.. _Django: http://djangoproject.com
-.. _`Uni-form`: http://sprawsm.com/uni-form
