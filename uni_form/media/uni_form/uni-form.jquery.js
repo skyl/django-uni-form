@@ -1,3 +1,5 @@
+// Author: Ilija Studen for the purposes of Uni–Form
+
 jQuery.fn.uniform = function(settings) {
   settings = jQuery.extend({
     valid_class    : 'valid',
@@ -9,22 +11,27 @@ jQuery.fn.uniform = function(settings) {
   
   return this.each(function() {
     var form = jQuery(this);
- 
+    
+    // Focus specific control holder
+    var focusControlHolder = function(element) {
+      element.parent('div[class~=' + settings.holder_class + ']').addClass(settings.focused_class);
+    };
+    
+    var removeFocusClass = function(){
+      form.find('.' + settings.focused_class).removeClass(settings.focused_class);
+    };
+
     // Select form fields and attach them higlighter functionality
     form.find(settings.field_selector).focus(function() {
-      form.find('.' + settings.focused_class).removeClass(settings.focused_class);
-      jQuery(this).parents("." + settings.holder_class).addClass(settings.focused_class)
+      removeFocusClass();
+      focusControlHolder(jQuery(this));
     }).blur(function() {
-      form.find('.' + settings.focused_class).removeClass(settings.focused_class);
+      removeFocusClass();
     });
   });
 };
 
 // Auto set on page load...
 $(document).ready(function() {
-  q = jQuery('form.uniForm');
-  if(q.length) {
-    q.uniform();
-  }
-  $(document.activeElement).focus() //safari doesn't support this and has no alternative
+  jQuery('form.uniForm').uniform();
 });

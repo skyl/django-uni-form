@@ -1,8 +1,11 @@
 # Django settings for test_project project.
 
+from distutils import version
 import os.path
 
 from os.path import join, abspath, dirname
+from django import get_version # TODO: remove when pre-CSRF token templatetags are no longer supported
+
 PROJECT_ROOT = abspath(dirname(__file__))
 PROJECT_ROOT = PROJECT_ROOT.replace('uni_form/tests/test_project','')
 
@@ -42,8 +45,7 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = PROJECT_ROOT.replace('/test_project','/uni_form/media/')
-
+MEDIA_ROOT = PROJECT_ROOT.replace('/test_project','/uni_form/media/uni_form')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -65,11 +67,21 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
+
+
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-)
+        'django.middleware.common.CommonMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+    )
+
+# TODO: remove when pre-CSRF token templatetags are no longer supported
+django_version = get_version()
+OLD_DJANGO = True
+if version.LooseVersion(django_version) >= version.LooseVersion('1.1.2'):
+    MIDDLEWARE_CLASSES += ('django.middleware.csrf.CsrfViewMiddleware',)
+    OLD_DJANGO = False
+
 
 ROOT_URLCONF = 'test_project.urls'
 
@@ -86,7 +98,3 @@ INSTALLED_APPS = (
     'test_app',
     'uni_form'
 )
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.request',
-    )

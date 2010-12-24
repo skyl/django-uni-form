@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.template import Context, Template
 from django.template.loader import get_template_from_string
 from django.test import TestCase
@@ -50,7 +51,7 @@ class TestBasicFunctionalityTags(TestCase):
         html = template.render(c)
         
         # Just look for file names because locations and names can change.
-        self.assertTrue('uni-form-generic.css' in html)
+        self.assertTrue('default.uni-form.css' in html)
         self.assertTrue('uni-form.css' in html)
         self.assertTrue('uni-form.jquery.js' in html)
         
@@ -93,20 +94,44 @@ class TestFormHelpers(TestCase):
         self.assertTrue('class="button"' in html)
         self.assertTrue('id="button-id-my-button"' in html)        
         '''
-    def test_uni_form_helper_generic_attributes(self):
+    def test_uni_form_helper_form_attributes(self):
         
+
+        template = get_template_from_string("""
+            {% load uni_form_tags %}
+            {% uni_form form form_helper %}
+        """)        
+
+        # First we build a standard form helper
         form_helper = FormHelper()    
         form_helper.form_id = 'this-form-rocks'
         form_helper.form_class = 'forms-that-rock'
         form_helper.form_method = 'GET'
     
+        # now we render it
         c = Context({'form':TestForm(),'form_helper':form_helper})            
-        template = get_template_from_string("""
-{% load uni_form_tags %}
-{% uni_form form form_helper %}
-        """)
         html = template.render(c)        
-
-        good_response = """<form action="" class="uniForm forms-that-rock" method="POST" id="this-form-rocks" >"""
         
-        #self.assertTrue('<form action="" class="uniForm forms-that-rock" method="GET" id="this-form-rocks" >' in html)
+        # Lets make sure everything loads right
+        self.assertTrue("""<form""" in html)                
+        self.assertTrue("""class="uniForm forms-that-rock" """ in html)
+        self.assertTrue("""method="get" """ in html)
+        self.assertTrue("""id="this-form-rocks">""" in html)        
+        
+        # now lets remove the form tag and render it again. All the True items above
+        # should now be false because the form tag is removed.
+        form_helper.form_tag = False
+        c = Context({'form':TestForm(),'form_helper':form_helper})            
+        html = template.render(c)        
+        self.assertFalse("""<form""" in html)        
+        self.assertFalse("""id="this-form-rocks">""" in html)                
+        self.assertFalse("""class="uniForm forms-that-rock" """ in html)
+        self.assertFalse("""method="get" """ in html)
+        self.assertFalse("""id="this-form-rocks">""" in html)
+        
+
+    def test_csrf_token(self):
+        is_old_django = getattr(settings, 'OLD_DJANGO', False) # TODO: remove when pre-CSRF token templatetags are no longer supported
+        if not is_old_django: # TODO: remove when pre-CSRF token templatetags are no longer supported
+            response = self.client.get('/more/csrf_token_test/')
+            self.assertContains(response, "<input type='hidden' name='csrfmiddlewaretoken'")

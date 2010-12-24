@@ -13,6 +13,7 @@ class TestForm(forms.Form):
     textarea_field = forms.CharField(label='Textareafield', required=True, widget=forms.Textarea())
     hidden_field = forms.CharField(label='textarea_field', required=True, widget=forms.HiddenInput())
     file_field  = forms.FileField(label="File Field",required=False)
+    password_field = forms.CharField(label='Password field', max_length=100, widget=forms.PasswordInput())
 
 
 
@@ -73,50 +74,12 @@ class LayoutTestForm(forms.Form):
                       
     submit = Submit('add','Add this contact')
     helper.add_input(submit)
-                    
 
+class MessageResponseForm(forms.Form):
     
-class ComplexLayoutTest(forms.Form):
-    """
-    TODO: get digi604 to make this work
+    character_field = forms.CharField(label="Character Field", help_text="I am help text", max_length=30, required=True, widget=forms.TextInput())
 
-    help_text = render_to_string("example/help_text.html")
-    layout = Layout(Fieldset(_('Basic Settings'),
-                             'title',
-                             'type',
-                             'available_date',
-                                ),
-                    Fieldset(_('Overview'),
-                             Column(Fieldset(_('Object address'),
-                                             Row('address', 'street_number'),
-                                             Row('zip', 'city'),
-                                             'area',
-                                            ),
-                                    Fieldset(_("Next public transport"),
-                                             'train_station',
-                                             Row('tram_station','tram_number'),
-                                             Row('bus_station','bus_number'),
-                                             ),
-                                    ),
-                             Column("is_for_rent",
-                                    Fieldset(_("Rent"),
-                                             'rent-price',
-                                             ),
-                                    Fieldset(_("Sell"),
-                                             'buy_price',
-                                             ),
-                                    Fieldset(_("Measurements"),
-                                             'floor_space',
-                                             'room_height',
-                                             'construction_year',
-                                             ),
-                             ),
-                    Fieldset(_('Additional Function'),
-                             HTML('<p class="tip">%s</p>' % unicode(help_text)),
-                             'features',
-                             ),
-                    Fieldset(_("Description"),
-                             "description")
-                    )
-    helper.add_layout(layout)
-    """
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        raise forms.ValidationError("This is a forced error")
+        return cleaned_data
